@@ -1,0 +1,12 @@
+#+TITLE \texttt{data-blossom} todo list
+
+* TODO Buy Boston parcel data and digitize
+  DEADLINE: <2008-12-15 Mon>
+* TODO Write script to digitize Boston parcel data
+  DEADLINE: <2008-12-15 Mon>
+* TODO Buy subscription to Boston parcel data
+  DEADLINE: <2008-12-19 Fri>
+* TODO Get updated Boston parcel data
+  DEADLINE: <2009-02-11 Wed>
+* TODO Fill out data-blossom project spec
+  DEADLINE: <2008-12-20 Sat>
