@@ -1,147 +1,146 @@
-import re
-import urllib2
-from BeautifulSoup import BeautifulSoup  
+#!/usr/bin/env python
 
-# OWNERS_NAME = re.compile (r"([A-Z][A-Z]+)\s+([A-Z][A-Z]+)")
+""" abandoned-parser.py
+original author: http://michaelnagle.org
+maintainer: http://michaelnagle.org
 
-abandonedFile = open('real.listing', 'r')
-outputFile = open('new.abandoned.listing', 'w')
+abandoned-parser.py
 
-for line in abandonedFile: #I had this as abandoned-file for a while. no dashes in var names.
+"""
+
+import re # Regular expressions module for flexible text processing
+import urllib2 # Used to open and download HTML files from URLs
+
+from BeautifulSoup import BeautifulSoup # Used for screen scraping HTML
+
+# Opens tab-separated-value (TSV) file where the first value of every
+# line is a parcel ID number
+abandonedFile = open('real.listing', 'r') # read mode
+
+# The file we are writing owners' information to
+outputFile = open('new.abandoned.listing', 'w') # write more
+
+
+for line in abandonedFile:
+    # TODO: Document abandoned-parser writing experience
+    # TODO: Note no dashes in variable names
     print line
-    parcelID = re.search("^(\d+)", line)
-    print parcelID.group(1)
-       
+
+    # This regular expression looks for one or more digits at the
+    # beginning of a line In our case, it matches the parcel ID number
+    # at the beginning of each line in real.listing
+    parcelIDmatches = re.search("^(\d+)", line)
+
+    parcelID = parcelIDmatched.group(1) # The actual parcel ID number.
+    print parcelID
+
+    # Trying to download the page 
     try:
-        ownerURLOPEN = urllib2.urlopen("http://www.cityofboston.gov/assessing/search/default.asp?mode=owner&pid=" + parcelID.group(1)) 
-        ownerHTML = ownerURLOPEN.read() #turns the object returned by urlopen and gives a html file.
-        
-    except:
+        bostonParcelSearchURL = "http://www.cityofboston.gov/assessing/search/default.asp?mode=owner&pid=" + parcelID
+        ownerURLobject = urllib2.urlopen(bostonParcelSearchURL) 
+        ownerHTML = ownerURLobject.read() # Converts urlopen object to HTML file.
+
+    except: # If opening the HTML file fails, skip to next parcel
         continue
 
-    #owner = re.search(r"<td align=\"right\">\s+([A-Z]+)\s+([A-Z]+)", ownerHTML)
-    #print owner.group(1)
-    #print owner.group(2)
-      #owner = re.search(r"<td align=\"right\">\s+([A-Z])\s+([A-Z])", ownerHTML   
-    #if owner:
-    #   ownersFirstName = owner.group(2)
-    #   ownersLastName = owner.group(1)
-  
+    soup = BeautifulSoup(ownerHTML) # BeautifulSoup takes HTML and
+                                    # creates an easy to navigate tree
+                                    # structure to browse the HTML
+                                    # tree (also known as the DOM
+                                    # tree)
 
-    #print "The owner's name is " + ownersFirstName + " " + ownersLastName
-
-    soup = BeautifulSoup(ownerHTML)
-    #print soup.prettify()
-    #td = soup('td')
-    #print soup.contents
-    #print td.contents[0]
+    allTableRows = soup.findAll("tr", "mainCategoryModuleText")
 
 
-    allTR = soup.findAll("tr", "mainCategoryModuleText")
+    # TODO: Document list comprehensions
 
-    x = 0
+    # Finds all td elements with the "align" attribute set to "right",
+    # grabs the first (which was the owner's information, and grabs
+    # the child root using contents, takes the first element, and
+    # strips all the whitespace, creating a list out of the results.
+    infoArray = (TR.findAll("td", {"align" : "right"})[0].contents[0].strip() for TR in allTableRows)
+    print "\n".join(infoArray) # Prints property info broken up by newlines
 
-    for TR in allTR:
-        print TR.findAll("td", {"align" : "right"})[0].contents[0].strip()
-        #infoArray[x] = TR.findAll("td", {"align" : "right"}[0].contents[0].strip()
-        #x = x + 1
+    (parcelID,
+     ownersAddress,
+     zoneType,
+     lotSize,
+     ownerName, # ownerName is a string of the form "lastName firstName"
+     lotAddress) = infoArray
 
-    infoArray = map(lambda x : x.findAll("td", {"align" : "right"})[0].contents[0].strip(), allTR)
-
-    print infoArray
-    #print parcelID
-
-    parcelID = infoArray[0]
-    ownersAddress = infoArray[1]
-    zoneAType = infoArray[2]
-    lotSize = infoArray[3]
-    name = infoArray[4] #last name, first name
-    address = infoArray[6]
 
     print "Owner's address is " + address
     
-    try:
-        streetAddress = re.search("^([\w\d]+\s+[\w\d]+)", address).group(1)
-    except:
-        streetAddress =""
+    # Searches address for two alphanumeric character blocks
+    # ([\w\d]+) broken up by whitespace (\s+)
+    streetAddressMatch = re.search("^([\w\d]+\s+[\w\d]+)", address)
+    if streetAddressMatch: # Won't execute if no street address found
+        streetAddress = streetAddressMatch.group(1)
+    else: # If there are no matches
+        streetAddress = ""
 
-    #city = re.search(", (.+?),", address).group(1)
-    zipCode = re.search("(\d+)$", address).group(1)
+    # Searches address for group of digits (\d+) which ends the line ($)
+    zipCodeMatches = re.search("(\d+)$", address)
+    zipCode = zipCodeMatches.group(1)
 
     
-    print "Name debug: variable name is " + name
-    lastName = re.search("^(\w+)", name).group(1)
-    if re.search("^[\w']+\s+([\w']+)", name):
-        firstName = re.search("^[\w']+\s+([\w']+)", name).group(1)
+    print "DEBUG: ownersName = " + ownersName
+
+    lastNameMatches = re.search("^(\w+)", name)
+    lastName = lastNameMatches.group(1)
+
+    # TODO: Find out why ' make sense; we assume that this is just
+    # handling a one-off case
+
+    firstNameMatch = re.search("^[\w']+\s+([\w']+)", ownersName)
+    if firstNameMatch: # Won't execute if no first name found
+        firstName = firstNameMatch.group(1)
     else:
         firstName = ""
-    state = re.search("(\w+)\s+\d+$", address).group(1)
+
+    # Captures the group of letters that precedes the zipcode
+    stateMatch = re.search("(\w+)\s+" + zipCode + "$", address)
+    state = stateMatch.group(1)
     
     print "The owner's name is " + firstName + " " + lastName
     print "Lot Size is " + lotSize
     print "The address is " + address
     print "The street address is " + streetAddress
-    #print "The city is " + city
     print "The zip code is " + zipCode
     print "The state is " + state
-    
-    #print soup.contents.contents
 
-    print "hitting try clause"
+    # Starting WhitePages.com parsing and searching
 
-    ownerURL = "http://api.whitepages.com/find_person/1.0/?firstname=" + firstName + ";lastname=" + lastName + ";street=" + streetAddress + ";city=;state=" + state + ";zip=" + zipCode + ";api_key=162d71ceef8f4aa20bad304f7b2e092a"
+    # Constructs URL for searching whitepages, using an API key which
+    # you can sign up for at http://developer.whitepages.com/page As
+    # of Dec 2008, the API key lets you make 1500 searches a day at a
+    # rate of 2 per second.
 
-    ownerURL = ownerURL.replace(' ','%20')
+    # This is the tightest match; it searches for the street name.
+    rawWhitePagesURL = "http://api.whitepages.com/find_person/1.0/?firstname=" + firstName + ";lastname=" + lastName + ";street=" + streetAddress + ";city=;state=" + state + ";zip=" + zipCode + ";api_key=162d71ceef8f4aa20bad304f7b2e092a"
 
+    # TODO: Document debugging frustration
+    # ownerURL = ownerURL.replace(' ','%20')
 
-    #print "trying to open: " + ownerURL
-
-    #ownerHTML = urllib2.urlopen(ownerURL).read()
-    
-    ownerURLmetro = "http://api.whitepages.com/find_person/1.0/?firstname=" + firstName + ";lastname=" + lastName + ";street=;city=;state=" + state + ";zip=" + zipCode + ";metro=1;api_key=162d71ceef8f4aa20bad304f7b2e092a"
-
-    ownerURLmetro = ownerURLmetro.replace(' ','%20')
-
-   # print "trying ownerHTMLmetro"
-   # ownerHTMLmetro = urllib2.urlopen(ownerURLmetro).read()
-   # print "ownerHTMLmetro opened"
-
- #   if re.search("(\(\d+\)\d+-\d+)", ownerHTML).group(1):
-    #        phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML).group(1)
-   #         print "1st phone number reg exp match worked."
-  #  else:
-  #         print "trying to open HTML metro in else/if"
-  #         ownerHTMLmetro = urllib2.urlopen(ownerURLmetro).read()
-  #         print "just read 2nd owner HTML, metro = 1"
-  #         if re.search("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro).group(1):
-  #              phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML).group(1)
-  #              print "2nd reg exp phone number match worked"
-
-
-#    if re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML):
-#        phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML).group(1)
-#        print "1st phone number reg exp match worked."
-#    else:
-#        print "trying to open HTML metro"
-#        ownerHTMLmetro = urllib2.urlopen(ownerURLmetro).read()
-#        print "just read 2nd owner HTML, metro = 1"
-#        print ownerURLmetro
-#        if re.search("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro):
-#            phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro).group(1)
+    # Encodes the string appropriately for passing to urlopen, turning
+    # spaces --> %20 and other special characters.  See
+    # http://docs.python.org/library/urllib.html#urllib.quote for
+    # details
+    whitePagesURL = urllib.quote(rawWhitePagesURL)
 
     phoneNumber = 0
-    
-    try:
-    
-        
-        
+
+    try:        
         ownerHTML = urllib2.urlopen(ownerURL).read()
         print "grabbed owner info HTML"
         if re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML):
             phoneNumber = re.findall("(\(\d+\)\s+\d+-\d+)", ownerHTML)
-            #phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTML).group(1)
             print "1st phone number reg exp match worked."
         else:
+            rawWhitePagesURLmetro = "http://api.whitepages.com/find_person/1.0/?firstname=" + firstName + ";lastname=" + lastName + ";street=;city=;state=" + state + ";zip=" + zipCode + ";metro=1;api_key=162d71ceef8f4aa20bad304f7b2e092a"
+
+            ownerURLmetro = ownerURLmetro.replace(' ','%20')
+
            print "trying to open HTML metro"
            ownerHTMLmetro = urllib2.urlopen(ownerURLmetro).read()
            print "just read 2nd owner HTML, metro = 1"
