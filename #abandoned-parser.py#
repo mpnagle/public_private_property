@@ -147,7 +147,7 @@ for line in abandonedFile:
            print ownerURLmetro
            if re.search("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro):
                phoneNumber = re.findall("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro) 
-               #phoneNumber = re.search("(\(\d+\)\s+\d+-\d+)", ownerHTMLmetro).group(1)
+
     except:
         print "Hitting except clause in phone number logic"
         
