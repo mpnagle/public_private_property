@@ -9,4 +9,4 @@
 * TODO Get updated Boston parcel data
   DEADLINE: <2009-02-11 Wed>
 * TODO Fill out data-blossom project spec
-  DEADLINE: <2008-12-29 Mon>
+  DEADLINE: <2009-01-05 Mon>
