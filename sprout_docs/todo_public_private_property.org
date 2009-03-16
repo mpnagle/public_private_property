@@ -23,9 +23,9 @@
 # will be used if/when the file gets [[glossary:render][rendered]]
 # into another format (like HTML).
 #
-#+TITLE: cabbage tasks
-#+AUTHOR: maintained by aresnick of http://alecresnick.org 
-#+EMAIL: alec@sproutward.org
+#+TITLE: public_private_property tasks
+#+AUTHOR: maintained by nagle of http://michaelnagle.org 
+#+EMAIL: nagle.org
 #+DATE: Last modified 02.07.09
 #+LANGUAGE: en
 #
@@ -38,8 +38,8 @@
 # [[glossary:org-agenda][agenda]] and the tags let you
 # [[glossary:tag][tag]] headlines.
 # 
-#+CATEGORY: cabbage 
-#+FILETAGS: sprout cabbage_todo.org cabbage
+#+CATEGORY: public_private_property 
+#+FILETAGS: sprout public_private_property todo_public_private_property.org 
 #
 #
 # ---
@@ -143,11 +143,11 @@ line, or drop by [[irc:/sprout/irc.freenode.net][#sprout]] on IRC.
 # ------------------------------------------------------------
 #
 
-* TODO Write script to digitize Boston parcel data		      :aresnick:
+* TODO Write script to digitize Boston parcel data			 :nagle:
   DEADLINE: <2009-02-26 Thu>
-* TODO Buy subscription to Boston parcel data			      :aresnick:
+* TODO Buy subscription to Boston parcel data				 :nagle:
   DEADLINE: <2009-02-25 Wed>
-* TODO Get updated Boston parcel data				      :aresnick:
+* TODO Get updated Boston parcel data					 :nagle:
   DEADLINE: <2009-02-25 Wed>
-* TODO Fill out data-blossom project spec			      :aresnick:
+* TODO Fill out data-blossom project spec				 :nagle:
   DEADLINE: <2009-03-02 Mon>
